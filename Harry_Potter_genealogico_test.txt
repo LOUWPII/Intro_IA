@@ -1,0 +1,39 @@
+1. Prueba de Pureza de Sangre
+
+Caso Pureza: 
+	nivel_sangre(draco_malfoy, X).
+
+Output esperado: X = pura.
+
+
+Caso Mestizo: 
+	nivel_sangre(harry_potter, X).
+
+Output esperado: X = mestizo.
+
+
+Caso Muggle:
+	nivel_sangre(hermione_granger, X).
+
+Output esperado: X = muggle. 
+
+
+2. Prueba de parentesco indirecto
+
+Suegros:
+	es_suegro(X, harry_potter).
+
+Output esperado: X = arthur_weasley y X = molly_weasley.
+
+
+Primos:
+	es_primo(sirius_black, X).
+
+Output esperado: Bellatrix, Andromeda, Narcisa.
+
+
+Tíos: 
+	es_tio(X, harry_potter).
+
+Output esperado: X = petunia_dursley 
+
