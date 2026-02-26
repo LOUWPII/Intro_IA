@@ -276,6 +276,7 @@ es_pariente(A,B) :- es_ancestro(C,A), es_ancestro(C,B).
 %Familia Politica
 es_cunado(A,B) :- (son_pareja(A,C),es_hermano(C,B));(es_hermano(A,C),son_pareja(C,B)).
 es_suegro(A,B) :- progenitor(A,C),son_pareja(C,B).
+es_tio_politico(C,B):- es_tio(A,B), son_pareja(A,C).
 
 /*
 es_sangre_pura(A) :- sangre_pura(A),\+ familia_de_muggles(A).
