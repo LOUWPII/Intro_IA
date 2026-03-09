@@ -1,3 +1,6 @@
+%estado(posicion robot, posicion caja, encima de la caja, tiene la bateria)t
+%accion(estado inicial, movimiento, estado final)
+
 bateria(8).
 limite(10).
 inicial(estado(1,5,no,no)).
@@ -9,7 +12,7 @@ costo(empujar_izquierda,2).
 costo(subir_caja,1).
 costo(agarrar_bateria,1).
 
-%Mover derecha
+%Mover derecha 
 accion(
   estado(PosRobot, PosCaja, no, TieneBateria),
           mover_derecha,
