@@ -39,6 +39,6 @@ a = Term("a")
 p_x = Literal(False, "P", [x,y])
 not_q_a = Literal(False, "Q", [a])
 
-# Crear una cláusula: P(x) ∨ ¬Q(a)
+# Crear una cláusula
 clause = Clause([p_x, not_q_a])
-print(clause)  # Salida: P(x) ∨ ¬Q(a)
+print(clause)
