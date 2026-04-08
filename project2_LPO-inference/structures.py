@@ -29,16 +29,75 @@ class Clause:
     def __str__(self):
         return " ∨ ".join(str(literal) for literal in self.literals)
 
+# --- Clases para el Árbol de Expresión (AST) ---
 
-# Crear términos
-x = Term("x")
-y = Term("y")
-a = Term("a")
+class Formula:
+    """Clase base para todas las fórmulas."""
+    pass
 
-# Crear literales
-p_x = Literal(False, "P", [x,y])
-not_q_a = Literal(False, "Q", [a])
+class Predicado(Formula):
+    def __init__(self, nombre, argumentos):
+        self.nombre = nombre
+        self.argumentos = argumentos # Lista de Term
 
-# Crear una cláusula
-clause = Clause([p_x, not_q_a])
-print(clause)
+    def __str__(self):
+        if not self.argumentos:
+            return self.nombre
+        args_str = ", ".join(str(a) for a in self.argumentos)
+        return f"{self.nombre}({args_str})"
+
+class Not(Formula):
+    def __init__(self, formula):
+        self.formula = formula
+
+    def __str__(self):
+        return f"¬({self.formula})"
+
+class And(Formula):
+    def __init__(self, izquierda, derecha):
+        self.izquierda = izquierda
+        self.derecha = derecha
+
+    def __str__(self):
+        return f"({self.izquierda} ∧ {self.derecha})"
+
+class Or(Formula):
+    def __init__(self, izquierda, derecha):
+        self.izquierda = izquierda
+        self.derecha = derecha
+
+    def __str__(self):
+        return f"({self.izquierda} ∨ {self.derecha})"
+
+class Implica(Formula):
+    def __init__(self, izquierda, derecha):
+        self.izquierda = izquierda
+        self.derecha = derecha
+
+    def __str__(self):
+        return f"({self.izquierda} → {self.derecha})"
+
+class DobleImplica(Formula):
+    def __init__(self, izquierda, derecha):
+        self.izquierda = izquierda
+        self.derecha = derecha
+
+    def __str__(self):
+        return f"({self.izquierda} ↔ {self.derecha})"
+
+class ParaTodo(Formula):
+    def __init__(self, variable, formula):
+        self.variable = variable # Term
+        self.formula = formula
+
+    def __str__(self):
+        return f"∀{self.variable} {self.formula}"
+
+class Existe(Formula):
+    def __init__(self, variable, formula):
+        self.variable = variable # Term
+        self.formula = formula
+
+    def __str__(self):
+        return f"∃{self.variable} {self.formula}"
+

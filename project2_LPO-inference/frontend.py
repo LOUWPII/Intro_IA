@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox, scrolledtext, Button, Entry, Listbox, Label
+from parser import parsear
+from cnf_converter import convertir_a_fnc_paso_a_paso
 
 class LogicInferenceGUI:
     def __init__(self, root):
@@ -56,11 +58,16 @@ class LogicInferenceGUI:
 
     def add_clause(self):
         """Agrega la cláusula ingresada a la lista."""
-        clause = self.clause_entry.get()
-        if clause:
-            self.clauses.append(clause)
-            self.clauses_listbox.insert(tk.END, clause)
-            self.clause_entry.delete(0, tk.END)
+        texto_formula = self.clause_entry.get()
+        if texto_formula:
+            try:
+                # Validamos que la fórmula se pueda parsear
+                formula_ast = parsear(texto_formula)
+                self.clauses.append(formula_ast)
+                self.clauses_listbox.insert(tk.END, str(formula_ast))
+                self.clause_entry.delete(0, tk.END)
+            except Exception as e:
+                messagebox.showerror("Error de Sintaxis", f"No se pudo entender la fórmula: {e}")
         else:
             messagebox.showwarning("Advertencia", "Ingresa una cláusula válida.")
 
@@ -70,14 +77,17 @@ class LogicInferenceGUI:
             messagebox.showwarning("Advertencia", "No hay cláusulas para ejecutar.")
             return
 
-        # Aquí iría la lógica del motor de inferencia
         self.result_text.delete(1.0, tk.END)
-        self.result_text.insert(tk.END, "Ejecutando motor de inferencia con las siguientes cláusulas:\n")
-        for clause in self.clauses:
-            self.result_text.insert(tk.END, f"- {clause}\n")
+        self.result_text.insert(tk.END, "=== Conversión a FNC Paso a Paso ===\n\n")
+        
+        for i, formula in enumerate(self.clauses):
+            self.result_text.insert(tk.END, f"Fórmula {i+1}:\n")
+            pasos = convertir_a_fnc_paso_a_paso(formula)
+            for nombre_paso, formula_str in pasos:
+                self.result_text.insert(tk.END, f"  [{nombre_paso}]: {formula_str}\n")
+            self.result_text.insert(tk.END, "\n" + "-"*40 + "\n\n")
 
-        # Ejemplo de resultado (simulado)
-        self.result_text.insert(tk.END, "\nResultado: La consulta es válida (ejemplo).")
+        self.result_text.insert(tk.END, "Conversión finalizada con éxito.")
 
 if __name__ == "__main__":
     root = tk.Tk()
