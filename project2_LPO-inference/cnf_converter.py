@@ -97,8 +97,138 @@ def mover_negacion(formula):
     return formula
 
 #def estandarizar variables
+contador_var = 0
+
+def nueva_variable(nombre):
+    global contador_var
+    contador_var += 1
+    return Term(f"{nombre}_{contador_var}")
+
+def estandarizar_variables(formula, mapa=None):
+    if mapa is None:
+        mapa = {}
+
+    if isinstance(formula, Predicado):
+        nuevos_args = []
+        for arg in formula.argumentos:
+            if arg.name in mapa:
+                nuevos_args.append(mapa[arg.name])
+            else:
+                nuevos_args.append(arg)
+        return Predicado(formula.nombre, nuevos_args)
+
+    if isinstance(formula, Not):
+        return Not(estandarizar_variables(formula.formula, mapa))
+
+    if isinstance(formula, And):
+        return And(
+            estandarizar_variables(formula.izquierda, mapa),
+            estandarizar_variables(formula.derecha, mapa)
+        )
+
+    if isinstance(formula, Or):
+        return Or(
+            estandarizar_variables(formula.izquierda, mapa),
+            estandarizar_variables(formula.derecha, mapa)
+        )
+
+    if isinstance(formula, ParaTodo) or isinstance(formula, Existe):
+        nueva_var = nueva_variable(formula.variable.name)
+        nuevo_mapa = mapa.copy()
+        nuevo_mapa[formula.variable.name] = nueva_var
+
+        return type(formula)(
+            nueva_var,
+            estandarizar_variables(formula.formula, nuevo_mapa)
+        )
+
+    return formula
+
 #def skolemizar   
+contador_skolem = 0
+
+def nueva_funcion_skolem(vars_universales):
+    global contador_skolem
+    contador_skolem += 1
+    nombre = f"SK{contador_skolem}"
+    return Term(nombre, vars_universales.copy())
+
+def skolemizar(formula, vars_universales=None):
+    if vars_universales is None:
+        vars_universales = []
+
+    if isinstance(formula, Predicado):
+        return formula
+
+    if isinstance(formula, Not):
+        return Not(skolemizar(formula.formula, vars_universales))
+
+    if isinstance(formula, And):
+        return And(
+            skolemizar(formula.izquierda, vars_universales),
+            skolemizar(formula.derecha, vars_universales)
+        )
+
+    if isinstance(formula, Or):
+        return Or(
+            skolemizar(formula.izquierda, vars_universales),
+            skolemizar(formula.derecha, vars_universales)
+        )
+
+    if isinstance(formula, ParaTodo):
+        nueva_lista = vars_universales + [formula.variable]
+        return ParaTodo(formula.variable,
+                        skolemizar(formula.formula, nueva_lista))
+
+    if isinstance(formula, Existe):
+        skolem = nueva_funcion_skolem(vars_universales)
+
+        def reemplazar(f):
+            if isinstance(f, Predicado):
+                nuevos_args = [
+                    skolem if arg.name == formula.variable.name else arg
+                    for arg in f.argumentos
+                ]
+                return Predicado(f.nombre, nuevos_args)
+
+            if isinstance(f, Not):
+                return Not(reemplazar(f.formula))
+
+            if isinstance(f, And):
+                return And(reemplazar(f.izquierda), reemplazar(f.derecha))
+
+            if isinstance(f, Or):
+                return Or(reemplazar(f.izquierda), reemplazar(f.derecha))
+
+            return f
+
+        return skolemizar(reemplazar(formula.formula), vars_universales)
+
+    return formula
 #def eliminaar cuantificador universal
+def eliminar_universales(formula):
+    if isinstance(formula, Predicado):
+        return formula
+
+    if isinstance(formula, Not):
+        return Not(eliminar_universales(formula.formula))
+
+    if isinstance(formula, And):
+        return And(
+            eliminar_universales(formula.izquierda),
+            eliminar_universales(formula.derecha)
+        )
+
+    if isinstance(formula, Or):
+        return Or(
+            eliminar_universales(formula.izquierda),
+            eliminar_universales(formula.derecha)
+        )
+
+    if isinstance(formula, ParaTodo):
+        return eliminar_universales(formula.formula)
+
+    return formula
 
 def distribuir_or(formula):
     """
@@ -146,9 +276,9 @@ def convertir_a_fnc_paso_a_paso(formula_inicial):
         ("Eliminar ↔", eliminar_bicondicional),
         ("Eliminar →", eliminar_implicacion),
         ("Mover ¬", mover_negacion),
-        #estandarizar variables
-        #skolemizar   
-        #eliminaar cuantificador universal
+        ("Estandarizar variables", estandarizar_variables),
+        ("Skolemizar", skolemizar),
+        ("Eliminar ∀", eliminar_universales),
         ("Distribución (FNC)", distribuir_or)
     ]
     
